@@ -26,21 +26,15 @@ public class securityconfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        return http
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-
                 .headers(headerConfigurer -> headerConfigurer
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
-                )
-
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .authorizeHttpRequests(requestMatcherRegistry -> requestMatcherRegistry
                         .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
-                        .requestMatchers("/user/**").hasAnyAuthority("USER","ADMIN")
-                        .anyRequest().fullyAuthenticated()
-                )
+                        .requestMatchers("/user/**").hasAnyAuthority("USER", "ADMIN")
+                        .anyRequest().permitAll())
                 .formLogin(formLoginConfigurer -> formLoginConfigurer
                         .loginPage("/login")
                         .failureUrl("/login?error=true")
@@ -49,7 +43,6 @@ public class securityconfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true"))
                 .userDetailsService(customeUserDetailsService)
-
                 .build();
     }
 }
